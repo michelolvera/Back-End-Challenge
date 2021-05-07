@@ -1,6 +1,8 @@
 package dev.michel.accountservice.controller;
 
 import dev.michel.accountservice.entity.Account;
+import dev.michel.accountservice.service.AccountService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,10 @@ import javax.validation.Valid;
 @Slf4j
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class AccountController {
+
+    private final AccountService accountService;
 
     @GetMapping
     public ResponseEntity<String> status() {
@@ -27,7 +32,8 @@ public class AccountController {
         if (result.hasErrors()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
         }
-        return ResponseEntity.ok(account);
+        Account accountCreate = accountService.createAccount(account);
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountCreate);
     }
 
     private String formatMessage(BindingResult result) {
