@@ -5,7 +5,7 @@ spring:
   application:
     name: accounts
   datasource:
-    url: jdbc:h2:mem:invoiceDB;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:accountDB;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driverClassName: org.h2.Driver
     platform: h2
     username: sa
