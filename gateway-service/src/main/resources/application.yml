@@ -7,11 +7,17 @@ eureka:
       defaultZone: http://localhost:8099/eureka/
 
 spring:
-  application:
-    name: gateway
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true
+      routes:
+        - id: accounts-service
+          uri: lb://accounts-service
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - RewritePath=/accounts/(?<path>.*), /$\{path}
+  application:
+    name: gateway-service
