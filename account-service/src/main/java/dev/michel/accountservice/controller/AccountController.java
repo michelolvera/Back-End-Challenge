@@ -15,15 +15,16 @@ import javax.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping("/")
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
 public class AccountController {
 
     private final AccountService accountService;
 
-    @GetMapping
-    public ResponseEntity<String> status() {
-        return ResponseEntity.ok("OK");
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<Account> status(@PathVariable("id") Long id) {
+        Account account = accountService.getAccount(id);
+        return account == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(account);
     }
 
     @PostMapping
@@ -34,6 +35,16 @@ public class AccountController {
         }
         Account accountCreate = accountService.createAccount(account);
         return ResponseEntity.status(HttpStatus.CREATED).body(accountCreate);
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<Account> updateAccount(@PathVariable("id") Long id, @Valid @RequestBody Account account, BindingResult result){
+        if (result.hasErrors()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
+        }
+        account.setId(id);
+        Account accountDB = accountService.updateAccount(account);
+        return accountDB == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(accountDB);
     }
 
     private String formatMessage(BindingResult result) {

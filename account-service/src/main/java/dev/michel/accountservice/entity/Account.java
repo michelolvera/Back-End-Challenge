@@ -6,6 +6,8 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -21,7 +23,12 @@ public class Account {
     @NotNull
     private Double cash;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createAt;
+
+    private String status;
+
     @Transient
-    private List<Issuer> issuers;
+    private List<Issuer> issuers = new ArrayList<>();
 
 }
