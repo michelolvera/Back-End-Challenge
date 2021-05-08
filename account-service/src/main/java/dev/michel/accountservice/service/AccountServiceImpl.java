@@ -36,7 +36,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account deleteAccount(Account account) {
-        return null;
+    public Account deleteAccount(Long id) {
+        Account accountDB = getAccount(id);
+        if (accountDB == null){
+            return null;
+        }
+        accountDB.setStatus("DELETED");
+        return accountRepository.save(accountDB);
     }
 }

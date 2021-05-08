@@ -1,6 +1,8 @@
 package dev.michel.accountservice.controller;
 
 import dev.michel.accountservice.entity.Account;
+import dev.michel.accountservice.model.Issuer;
+import dev.michel.accountservice.model.OperationResponse;
 import dev.michel.accountservice.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +47,24 @@ public class AccountController {
         account.setId(id);
         Account accountDB = accountService.updateAccount(account);
         return accountDB == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(accountDB);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Account> deleteAccount(@PathVariable("id") Long id){
+        Account accountDB = accountService.deleteAccount(id);
+        if (accountDB == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(accountDB);
+    }
+
+    @PostMapping(value = "/{id}/orders")
+    public ResponseEntity<OperationResponse> createIssuer(@PathVariable("id") Long id, @Valid @RequestBody Issuer issuer, BindingResult result){
+        if (result.hasErrors()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
+        }
+        return ResponseEntity.ok(new OperationResponse());
+        // TODO: Terminar esto
     }
 
     private String formatMessage(BindingResult result) {

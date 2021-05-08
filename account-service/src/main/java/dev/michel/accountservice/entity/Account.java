@@ -1,5 +1,6 @@
 package dev.michel.accountservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.michel.accountservice.model.Issuer;
 import lombok.Data;
 
@@ -24,8 +25,10 @@ public class Account {
     private Double cash;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date createAt;
 
+    @JsonIgnore
     private String status;
 
     @Transient

@@ -18,6 +18,7 @@ spring:
           predicates:
             - Path=/accounts/**
           filters:
-            - RewritePath=/accounts/(?<path>.*), /$\{path}
+            - RewritePath=/accounts/(?<path>swagger.*), /$\{path}
+            - RewritePath=/accounts/(?<path>v3.*), /$\{path}
   application:
     name: gateway-service
