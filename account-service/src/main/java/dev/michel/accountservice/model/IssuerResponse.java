@@ -4,18 +4,10 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 
 @Data
-public class Issuer {
-    @NotNull
-    private Long timestamp;
-
-    @NotNull
-    @Pattern(regexp = "^(BUY|SELL)$")
-    private String operation;
-
+public class IssuerResponse {
     @NotNull
     @NotEmpty
     private String issuer_name;
