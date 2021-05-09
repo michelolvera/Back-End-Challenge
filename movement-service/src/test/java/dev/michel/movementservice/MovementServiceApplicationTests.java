@@ -1,10 +1,10 @@
-package dev.michel.balanceservice;
+package dev.michel.movementservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BalanceServiceApplicationTests {
+class MovementServiceApplicationTests {
 
     @Test
     void contextLoads() {
