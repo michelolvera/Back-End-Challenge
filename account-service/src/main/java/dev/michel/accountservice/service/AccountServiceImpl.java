@@ -1,6 +1,5 @@
 package dev.michel.accountservice.service;
 
-import dev.michel.accountservice.client.MovementClient;
 import dev.michel.accountservice.client.MovementClientCircuitBreaker;
 import dev.michel.accountservice.entity.Account;
 import dev.michel.accountservice.repository.AccountRepository;
@@ -21,7 +20,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(id).orElse(null);
         if (account != null)
             account.setIssuers(movementClient.getAllIssuersByAccountId(id).getBody());
-        return accountRepository.findById(id).orElse(null);
+        return account;
     }
 
     @Override
@@ -29,8 +28,7 @@ public class AccountServiceImpl implements AccountService {
         account.setStatus("CREATED");
         account.setCreateAt(new Date());
         Account accountDB = accountRepository.save(account);
-        if (accountDB != null)
-            accountDB.setIssuers(movementClient.movementsFallback(account.getId(), null).getBody());
+        accountDB.setIssuers(movementClient.movementsFallback(account.getId(), null).getBody());
         return accountDB;
     }
 

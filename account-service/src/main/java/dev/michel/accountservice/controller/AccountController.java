@@ -4,6 +4,7 @@ import dev.michel.accountservice.entity.Account;
 import dev.michel.accountservice.model.Issuer;
 import dev.michel.accountservice.model.OperationResponse;
 import dev.michel.accountservice.service.AccountService;
+import dev.michel.accountservice.service.OperationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import javax.validation.Valid;
 public class AccountController {
 
     private final AccountService accountService;
+    private final OperationService operationService;
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<Account> status(@PathVariable("id") Long id) {
@@ -63,8 +65,8 @@ public class AccountController {
         if (result.hasErrors()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
         }
-        return ResponseEntity.ok(new OperationResponse());
-        // TODO: Terminar esto
+        OperationResponse operationResponse = operationService.createOperation(id, issuer);
+        return ResponseEntity.ok(operationResponse);
     }
 
     private String formatMessage(BindingResult result) {

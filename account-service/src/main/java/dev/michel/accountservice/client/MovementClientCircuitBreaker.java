@@ -26,7 +26,7 @@ public class MovementClientCircuitBreaker {
     }
 
     @Bulkhead(name = "/movements/{accountId}", fallbackMethod = "movementsFallback")
-    public ResponseEntity<List<Issuer>> createMovement(@PathVariable("accountId") Long accountId, @Valid @RequestBody Issuer issuer){
+    public ResponseEntity<List<Issuer>> createMovement(@PathVariable("accountId") Long accountId, @RequestBody Issuer issuer){
         return movementClient.createMovement(accountId, issuer);
     }
 
