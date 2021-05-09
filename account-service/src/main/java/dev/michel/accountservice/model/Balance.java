@@ -9,5 +9,5 @@ import java.util.List;
 @Builder
 public class Balance {
     private Double cash;
-    private List<Issuer> issuers;
+    private List<IssuerResponse> issuers;
 }

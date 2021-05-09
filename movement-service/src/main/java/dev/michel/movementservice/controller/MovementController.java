@@ -1,6 +1,7 @@
 package dev.michel.movementservice.controller;
 
-import dev.michel.movementservice.entity.Issuer;
+import dev.michel.movementservice.entity.IssuerRequest;
+import dev.michel.movementservice.entity.IssuerResponse;
 import dev.michel.movementservice.service.IssuerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,21 +24,18 @@ public class MovementController {
     private final IssuerService issuerService;
 
     @GetMapping(value = "/{accountId}")
-    public ResponseEntity<List<Issuer>> getAllIssuersByAccountId(@PathVariable("accountId") Long accountId){
+    public ResponseEntity<List<IssuerResponse>> getAllIssuersByAccountId(@PathVariable("accountId") Long accountId){
         return ResponseEntity.ok(issuerService.getAllIssuersByAccountId(accountId));
     }
 
     @PostMapping(value = "/{accountId}")
-    public ResponseEntity<List<Issuer>> createMovement(@PathVariable("accountId") Long accountId, @Valid @RequestBody Issuer issuer, BindingResult result){
+    public ResponseEntity<List<IssuerResponse>> createMovement(@PathVariable("accountId") Long accountId, @Valid @RequestBody IssuerRequest issuerRequest, BindingResult result){
         if (result.hasErrors()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
         }
-        issuer.setAccountId(accountId);
-        List<Issuer> actualIssuers = issuerService.createIssuer(issuer);
-        if (actualIssuers.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The transaction could not be created correctly, your balance was not affected.");
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(actualIssuers);
+        issuerRequest.setAccountId(accountId);
+        List<IssuerResponse> actualIssuerResponse = issuerService.createIssuer(issuerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(actualIssuerResponse);
     }
 
     private String formatMessage(BindingResult result) {

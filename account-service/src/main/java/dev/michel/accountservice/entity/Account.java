@@ -1,13 +1,12 @@
 package dev.michel.accountservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.michel.accountservice.model.Issuer;
+import dev.michel.accountservice.model.IssuerRequest;
+import dev.michel.accountservice.model.IssuerResponse;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +19,6 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Positive
     @NotNull
     private Double cash;
 
@@ -32,6 +30,6 @@ public class Account {
     private String status;
 
     @Transient
-    private List<Issuer> issuers;
+    private List<IssuerResponse> issuers;
 
 }

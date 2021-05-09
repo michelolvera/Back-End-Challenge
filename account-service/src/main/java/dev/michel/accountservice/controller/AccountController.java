@@ -1,7 +1,7 @@
 package dev.michel.accountservice.controller;
 
 import dev.michel.accountservice.entity.Account;
-import dev.michel.accountservice.model.Issuer;
+import dev.michel.accountservice.model.IssuerRequest;
 import dev.michel.accountservice.model.OperationResponse;
 import dev.michel.accountservice.service.AccountService;
 import dev.michel.accountservice.service.OperationService;
@@ -37,6 +37,9 @@ public class AccountController {
         if (result.hasErrors()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
         }
+        if (account.getCash() < 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cash: debe ser mayor que 0");
+        }
         Account accountCreate = accountService.createAccount(account);
         return ResponseEntity.status(HttpStatus.CREATED).body(accountCreate);
     }
@@ -61,11 +64,11 @@ public class AccountController {
     }
 
     @PostMapping(value = "/{id}/orders")
-    public ResponseEntity<OperationResponse> createIssuer(@PathVariable("id") Long id, @Valid @RequestBody Issuer issuer, BindingResult result){
+    public ResponseEntity<OperationResponse> createIssuer(@PathVariable("id") Long id, @Valid @RequestBody IssuerRequest issuerRequest, BindingResult result){
         if (result.hasErrors()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
         }
-        OperationResponse operationResponse = operationService.createOperation(id, issuer);
+        OperationResponse operationResponse = operationService.createOperation(id, issuerRequest);
         return ResponseEntity.ok(operationResponse);
     }
 

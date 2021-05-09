@@ -1,6 +1,6 @@
 package dev.michel.movementservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -8,13 +8,12 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
-import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @Entity
 @Table
-public class Issuer implements Serializable {
+public class IssuerRequest extends IssuerResponse{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,15 +21,13 @@ public class Issuer implements Serializable {
     private Long accountId;
 
     @NotNull
+    @Transient
     private Long timestamp;
 
     @NotNull
-    @Pattern(regexp = "^(BUY|SELL)$")
-    private String operation;
-
-    @NotNull
     @NotEmpty
-    private String issuer_name;
+    @JsonProperty(value = "issuer_name")
+    private String issuerName;
 
     @NotNull
     @Positive
@@ -40,7 +37,11 @@ public class Issuer implements Serializable {
     @Positive
     private Double share_price;
 
+    @NotNull
+    @Pattern(regexp = "^(BUY|SELL|buy|sell)$")
+    @Transient
+    private String operation;
+
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonIgnore
     private Date createAt;
 }

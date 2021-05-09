@@ -1,10 +1,11 @@
 package dev.michel.movementservice.service;
 
-import dev.michel.movementservice.entity.Issuer;
+import dev.michel.movementservice.entity.IssuerRequest;
+import dev.michel.movementservice.entity.IssuerResponse;
 
 import java.util.List;
 
 public interface IssuerService {
-    List<Issuer> createIssuer(Issuer issuer);
-    List<Issuer> getAllIssuersByAccountId(Long accountId);
+    List<IssuerResponse> createIssuer(IssuerRequest issuerRequest);
+    List<IssuerResponse> getAllIssuersByAccountId(Long accountId);
 }
