@@ -21,11 +21,11 @@ spring:
             - RewritePath=/accounts/(?<path>swagger.*), /$\{path}
             - RewritePath=/accounts/(?<path>v3.*), /$\{path}
         - id: movement-service
-            uri: lb://movement-service
-            predicates:
-              - Path=/movements/**
-            filters:
-              - RewritePath=/movements/(?<path>swagger.*), /$\{path}
-              - RewritePath=/movements/(?<path>v3.*), /$\{path}
+          uri: lb://movement-service
+          predicates:
+            - Path=/movements/**
+          filters:
+            - RewritePath=/movements/(?<path>swagger.*), /$\{path}
+            - RewritePath=/movements/(?<path>v3.*), /$\{path}
   application:
     name: gateway-service

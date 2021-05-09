@@ -1,5 +1,7 @@
 package dev.michel.accountservice.service;
 
+import dev.michel.accountservice.client.MovementClient;
+import dev.michel.accountservice.client.MovementClientCircuitBreaker;
 import dev.michel.accountservice.entity.Account;
 import dev.michel.accountservice.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +14,13 @@ import java.util.Date;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+    private final MovementClientCircuitBreaker movementClient;
 
     @Override
     public Account getAccount(Long id) {
+        Account account = accountRepository.findById(id).orElse(null);
+        if (account != null)
+            account.setIssuers(movementClient.getAllIssuersByAccountId(id).getBody());
         return accountRepository.findById(id).orElse(null);
     }
 
@@ -22,7 +28,10 @@ public class AccountServiceImpl implements AccountService {
     public Account createAccount(Account account) {
         account.setStatus("CREATED");
         account.setCreateAt(new Date());
-        return accountRepository.save(account);
+        Account accountDB = accountRepository.save(account);
+        if (accountDB != null)
+            accountDB.setIssuers(movementClient.movementsFallback(account.getId(), null).getBody());
+        return accountDB;
     }
 
     @Override
@@ -32,7 +41,8 @@ public class AccountServiceImpl implements AccountService {
             return null;
         }
         accountDB.setCash(accountDB.getCash() + account.getCash());
-        return accountRepository.save(accountDB);
+        accountDB = accountRepository.save(accountDB);
+        return accountDB;
     }
 
     @Override
@@ -42,6 +52,7 @@ public class AccountServiceImpl implements AccountService {
             return null;
         }
         accountDB.setStatus("DELETED");
-        return accountRepository.save(accountDB);
+        accountDB = accountRepository.save(accountDB);
+        return accountDB;
     }
 }

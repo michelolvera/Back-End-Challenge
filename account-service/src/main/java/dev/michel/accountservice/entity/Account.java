@@ -32,6 +32,6 @@ public class Account {
     private String status;
 
     @Transient
-    private List<Issuer> issuers = new ArrayList<>();
+    private List<Issuer> issuers;
 
 }
