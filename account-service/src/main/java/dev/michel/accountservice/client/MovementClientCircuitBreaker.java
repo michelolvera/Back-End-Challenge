@@ -13,27 +13,58 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase que implementa un circuitbreaker para el cliente Feign MovementClient
+ */
 @RequiredArgsConstructor
 @RestController
 public class MovementClientCircuitBreaker {
 
     private final MovementClient movementClient;
 
+    /**
+     * Obtiene la lista de emisores para una cuenta solicitada
+     *
+     * @param accountId ID de la cuenta a consultar
+     * @return Lista de emisores
+     */
     @Bulkhead(name = "/movements/{accountId}", fallbackMethod = "movementsFallback")
     public ResponseEntity<List<IssuerResponse>> getAllIssuersByAccountId(@PathVariable("accountId") Long accountId) {
         return movementClient.getAllIssuersByAccountId(accountId);
     }
 
+    /**
+     * Obtiene la lista de emisores para una cuenta solicitada después de crear una operación
+     *
+     * @param accountId     ID de la cuenta a consultar
+     * @param issuerRequest Operación a realizar
+     * @return Lista de emisores
+     */
     @Bulkhead(name = "/movements/{accountId}", fallbackMethod = "movementsFallback")
-    public ResponseEntity<List<IssuerResponse>> createMovement(@PathVariable("accountId") Long accountId, @RequestBody IssuerRequest issuerRequest){
+    public ResponseEntity<List<IssuerResponse>> createMovement(@PathVariable("accountId") Long accountId, @RequestBody IssuerRequest issuerRequest) {
         return movementClient.createMovement(accountId, issuerRequest);
     }
 
-    public ResponseEntity<List<IssuerResponse>> movementsFallback(Long accountId, Throwable throwable){
+    /**
+     * Este método se llama únicamente cuando el cliente Feign detecta un error, se utiliza como respuesta alternativa.
+     *
+     * @param accountId ID de la cuenta a consultar
+     * @param throwable Excepción generada por el cliente Feign
+     * @return Lista de emisores vacía como respuesta alternativa con código de estado INTERNAL_SERVER_ERROR
+     */
+    public ResponseEntity<List<IssuerResponse>> movementsFallback(Long accountId, Throwable throwable) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
     }
 
-    public ResponseEntity<List<IssuerResponse>> movementsFallback(Long accountId, IssuerRequest issuerRequest, Throwable throwable){
+    /**
+     * Este método se llama únicamente cuando el cliente Feign detecta un error, se utiliza como respuesta alternativa.
+     *
+     * @param accountId     ID de la cuenta a consultar
+     * @param issuerRequest Operación a realizar
+     * @param throwable     Excepción generada por el cliente Feign
+     * @return Lista de emisores vacía como respuesta alternativa con código de estado INTERNAL_SERVER_ERROR
+     */
+    public ResponseEntity<List<IssuerResponse>> movementsFallback(Long accountId, IssuerRequest issuerRequest, Throwable throwable) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
     }
 }
