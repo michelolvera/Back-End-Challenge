@@ -10,9 +10,15 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Objects;
 
+/**
+ * Clase que prueba la lógica de negocio de OperationService
+ */
 @SpringBootTest
 public class OperationServiceMockTest extends SetupMockTest {
 
+    /**
+     * Cuando se hace una operación a una cuenta inexistente se retorna el error  "INEXISTENT_ACCOUNT"
+     */
     @Test
     public void whenMakeOperationToInexistentAccount_thenReturnInexistentAccountError(){
         IssuerRequest issuerRequest = getBasicIssuerRequest();
@@ -21,6 +27,9 @@ public class OperationServiceMockTest extends SetupMockTest {
         Assertions.assertThat(Objects.requireNonNull(responseEntity.getBody()).getBusiness_errors().get(0)).isEqualTo("INEXISTENT_ACCOUNT");
     }
 
+    /**
+     * Cuando e hace una operación en un horario no hábil se retorna el error "CLOSED_MARKET"
+     */
     @Test
     public void whenMakeOperationInCloseMarket_thenReturnCloseMarketError(){
         IssuerRequest issuerRequest = getBasicIssuerRequest();
@@ -31,6 +40,9 @@ public class OperationServiceMockTest extends SetupMockTest {
         Assertions.assertThat(responseEntity.getBody().getCurrent_balance().getCash()).isEqualTo(1000);
     }
 
+    /**
+     * Cuando se intenta realizar una operación sin suficiente crédito se retorna el error "NOT_ENOUGH_CASH"
+     */
     @Test
     public void whenMakeBuyOperationWithoutEnoughCash_thenReturnEnoughCashError(){
         IssuerRequest issuerRequest = getBasicIssuerRequest();
@@ -41,6 +53,9 @@ public class OperationServiceMockTest extends SetupMockTest {
         Assertions.assertThat(Objects.requireNonNull(responseEntity.getBody()).getCurrent_balance().getCash()).isEqualTo(1000.0);
     }
 
+    /**
+     * Cuando se intenta realizar una operación sin suficientes acciones se retorna el error "NOT_ENOUGH_SHARES"
+     */
     @Test
     public void whenMakeSellOperationWithoutEnoughShares_thenReturnEnoughSharesError(){
         IssuerRequest issuerRequest = getBasicIssuerRequest();
@@ -51,6 +66,10 @@ public class OperationServiceMockTest extends SetupMockTest {
         Assertions.assertThat(Objects.requireNonNull(responseEntity.getBody()).getCurrent_balance().getCash()).isEqualTo(1000.0);
     }
 
+    /**
+     * Método que retorna una operación a realizar para pruebas
+     * @return Operación a realizar con datos ficticios
+     */
     private IssuerRequest getBasicIssuerRequest(){
         IssuerRequest issuerRequest = new IssuerRequest();
         issuerRequest.setTimestamp(1571325625L);

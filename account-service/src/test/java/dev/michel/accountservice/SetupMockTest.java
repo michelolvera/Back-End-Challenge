@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ * Clase que configura el entorno de pruebas y de la cual las pruebas extienden
+ */
 public class SetupMockTest {
     OperationService operationService;
     AccountService accountService;
@@ -26,6 +29,9 @@ public class SetupMockTest {
     @Autowired
     private MovementClientCircuitBreaker movementClient;
 
+    /**
+     * Método que aplica la configuración de un repositorio ficticio
+     */
     @BeforeEach
     public void setup(){
         MockitoAnnotations.openMocks(this);
