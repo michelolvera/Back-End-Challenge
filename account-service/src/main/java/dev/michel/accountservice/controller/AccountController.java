@@ -68,8 +68,7 @@ public class AccountController {
         if (result.hasErrors()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, this.formatMessage(result));
         }
-        OperationResponse operationResponse = operationService.createOperation(id, issuerRequest);
-        return ResponseEntity.ok(operationResponse);
+        return operationService.createOperation(id, issuerRequest);
     }
 
     private String formatMessage(BindingResult result) {

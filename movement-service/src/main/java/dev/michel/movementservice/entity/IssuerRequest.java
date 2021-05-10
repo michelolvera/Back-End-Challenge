@@ -2,6 +2,8 @@ package dev.michel.movementservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -10,7 +12,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table
 public class IssuerRequest extends IssuerResponse{
