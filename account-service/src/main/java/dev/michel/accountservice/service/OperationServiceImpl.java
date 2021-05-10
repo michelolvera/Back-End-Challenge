@@ -28,7 +28,6 @@ public class OperationServiceImpl implements OperationService{
         if (currentAccount == null){
             return ResponseEntity.badRequest().body(operationResponseErrorBuilder(null, "INEXISTENT_ACCOUNT"));
         }
-        // TODO: 09/05/2021 Close Market
         if(isClosedMarket(issuerRequest.getTimestamp()))
             return ResponseEntity.badRequest().body(operationResponseErrorBuilder(currentAccount, "CLOSED_MARKET"));
         Double operationValue = issuerRequest.getShare_price() * issuerRequest.getTotal_shares();
@@ -51,8 +50,11 @@ public class OperationServiceImpl implements OperationService{
         if (currentIssuersResponseEntity.getStatusCode() != HttpStatus.CREATED){
             updatedAccount = updateAccountCash(currentAccount, -operationValue);
             if(updatedAccount == null)
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(operationResponseErrorBuilder(currentAccount, "ERROR_UNDOING_OPERATION"));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(operationResponseErrorBuilder(updatedAccount, "ERROR_GENERATING_TRANSACTION"));
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(operationResponseErrorBuilder(currentAccount, "ERROR_UNDOING_TRANSACTION"));
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(OperationResponse.builder()
+                    .business_errors(Arrays.asList("ERROR_GENERATING_TRANSACTION", "HAS_IT_BEEN_5_MINUTES_SINCE_LAST_TRANSACTION?"))
+                    .current_balance(getCurrentBalance(currentAccount))
+                    .build());
         }
         updatedAccount.setIssuers(currentIssuersResponseEntity.getBody());
         return ResponseEntity.ok(OperationResponse.builder()
