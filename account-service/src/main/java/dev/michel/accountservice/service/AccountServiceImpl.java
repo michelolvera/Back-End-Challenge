@@ -29,10 +29,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account getAccount(Long id) {
         Account account = accountRepository.findById(id).orElse(null);
-        if (account.getStatus().equalsIgnoreCase("DELETED"))
-            return null;
-        if (account != null)
+        if (account != null){
+            if (account.getStatus().equalsIgnoreCase("DELETED"))
+                return null;
             account.setIssuers(movementClient.getAllIssuersByAccountId(id).getBody());
+        }
         return account;
     }
 
