@@ -36,7 +36,7 @@ public class IssuerServiceImpl implements IssuerService {
      * @return Lista de acciones de un usuario
      */
     @Override
-    public List<IssuerResponse> createIssuer(IssuerRequest issuerRequest) {
+    public List<IssuerResponse> createIssuer(IssuerRequest issuerRequest) throws ResponseStatusException{
         if (isClosedMarket(issuerRequest.getTimestamp()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closed Market");
         IssuerRegistry lastSameOperation = issuerRegistryRepository.findByAccountIdAndIssuerNameAndTotalSharesAndSharePriceAndOperation(issuerRequest.getAccountId(), issuerRequest.getIssuerName(), issuerRequest.getTotal_shares(), issuerRequest.getShare_price(), issuerRequest.getOperation());
@@ -51,26 +51,27 @@ public class IssuerServiceImpl implements IssuerService {
             issuerRequest.setCreateAt(new Date());
             issuerRepository.save(issuerRequest);
         } else {
+            currentIssuer.setShare_price(issuerRequest.getShare_price());
+            currentIssuer.setOperation(issuerRequest.getOperation());
+            currentIssuer.setTimestamp(issuerRequest.getTimestamp());
             switch (issuerRequest.getOperation()) {
                 case "BUY":
                     currentIssuer.setTotal_shares(currentIssuer.getTotal_shares() + issuerRequest.getTotal_shares());
+                    issuerRepository.save(currentIssuer);
                     break;
                 case "SELL":
                     if (currentIssuer.getTotal_shares() < issuerRequest.getTotal_shares())
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You don't have enough shares");
+                    if (currentIssuer.getTotal_shares() - issuerRequest.getTotal_shares() == 0)
+                        issuerRepository.delete(currentIssuer);
+                    else {
+                        currentIssuer.setTotal_shares(currentIssuer.getTotal_shares() - issuerRequest.getTotal_shares());
+                        issuerRepository.save(currentIssuer);
+                    }
                     break;
             }
-            currentIssuer.setShare_price(issuerRequest.getShare_price());
-            currentIssuer.setOperation(issuerRequest.getOperation());
-            currentIssuer.setTimestamp(issuerRequest.getTimestamp());
-            if (currentIssuer.getTotal_shares() - issuerRequest.getTotal_shares() == 0)
-                issuerRepository.delete(currentIssuer);
-            else {
-                currentIssuer.setTotal_shares(currentIssuer.getTotal_shares() - issuerRequest.getTotal_shares());
-                issuerRepository.save(currentIssuer);
-            }
         }
-        issuerRegistryRepository.save(issuerRequestToIssuerRegistryMapper(issuerRequest));
+        issuerRegistryRepository.save(apiUtils.issuerRequestToIssuerRegistryMapper(issuerRequest));
         return getAllIssuersByAccountId(issuerRequest.getAccountId());
     }
 
@@ -94,22 +95,5 @@ public class IssuerServiceImpl implements IssuerService {
     private boolean isClosedMarket(Long timeStamp) {
         int hourOfDay = apiUtils.timestampToCalendar(timeStamp).get(Calendar.HOUR_OF_DAY);
         return hourOfDay < 6 || hourOfDay >= 15;
-    }
-
-    /**
-     * Método que convierte un objeto issuerRequest a IssuerRegistry
-     *
-     * @param issuerRequest El objeto issuerRequest a convertir
-     * @return El objeto IssuerRegistry con datos
-     */
-    private IssuerRegistry issuerRequestToIssuerRegistryMapper(IssuerRequest issuerRequest) {
-        IssuerRegistry issuerRegistry = new IssuerRegistry();
-        issuerRegistry.setAccountId(issuerRequest.getAccountId());
-        issuerRegistry.setOperationMoment(apiUtils.timestampToCalendar(issuerRequest.getTimestamp()).getTime());
-        issuerRegistry.setIssuerName(issuerRequest.getIssuerName());
-        issuerRegistry.setTotalShares(issuerRequest.getTotal_shares());
-        issuerRegistry.setSharePrice(issuerRequest.getShare_price());
-        issuerRegistry.setOperation(issuerRequest.getOperation());
-        return issuerRegistry;
     }
 }

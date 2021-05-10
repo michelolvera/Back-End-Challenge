@@ -1,5 +1,7 @@
 package dev.michel.movementservice.util;
 
+import dev.michel.movementservice.entity.IssuerRegistry;
+import dev.michel.movementservice.entity.IssuerRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -28,5 +30,22 @@ public class ApiUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timeStamp * 1000));
         return calendar;
+    }
+
+    /**
+     * Método que convierte un objeto issuerRequest a IssuerRegistry
+     *
+     * @param issuerRequest El objeto issuerRequest a convertir
+     * @return El objeto IssuerRegistry con datos
+     */
+    public IssuerRegistry issuerRequestToIssuerRegistryMapper(IssuerRequest issuerRequest) {
+        IssuerRegistry issuerRegistry = new IssuerRegistry();
+        issuerRegistry.setAccountId(issuerRequest.getAccountId());
+        issuerRegistry.setOperationMoment(timestampToCalendar(issuerRequest.getTimestamp()).getTime());
+        issuerRegistry.setIssuerName(issuerRequest.getIssuerName());
+        issuerRegistry.setTotalShares(issuerRequest.getTotal_shares());
+        issuerRegistry.setSharePrice(issuerRequest.getShare_price());
+        issuerRegistry.setOperation(issuerRequest.getOperation());
+        return issuerRegistry;
     }
 }
