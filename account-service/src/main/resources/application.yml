@@ -6,7 +6,7 @@ spring:
   application:
     name: accounts-service # Nombre de la aplicación
   datasource:
-    url: jdbc:mysql://mysql:3306/${DB} # URL de la base de datos a la que se conectara
+    url: jdbc:mysql://${DB_URL}:3306/${DB} # URL de la base de datos a la que se conectara
     driverClassName: com.mysql.cj.jdbc.Driver # Driver utilizado para el manejo de la base de datos
     username: ${DB_USER} # Nombre de usuario de la base de datos
     password: ${DB_PASS} # Contraseña de la base de datos
@@ -16,7 +16,7 @@ spring:
   boot:
     admin:
       client:
-        url: http://admin-service:8086 # URL del servidor Spring Boot Admin
+        url: http://${ADMIN_URL}:8086 # URL del servidor Spring Boot Admin
 
 logging:
   pattern:
@@ -25,7 +25,7 @@ logging:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://registry-service:8099/eureka/ # URL del servidor Eureka
+      defaultZone: http://${REGISTRY_URL}:8099/eureka/ # URL del servidor Eureka
 
 feign:
   circuitbreaker:

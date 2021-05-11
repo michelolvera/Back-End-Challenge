@@ -23,6 +23,8 @@ services:
     restart: always
     ports:
       - 8080:8080
+    environment:
+      REGISTRY_URL: registry-service
   admin-service:
     build: 
       context: ./admin-service
@@ -37,6 +39,9 @@ services:
       DB: database
       DB_USER: user
       DB_PASS: password
+      DB_URL: mysql
+      ADMIN_URL: admin-service
+      REGISTRY_URL: registry-service
     depends_on:
       - mysql
   movement-service:
@@ -47,6 +52,9 @@ services:
       DB: database
       DB_USER: user
       DB_PASS: password
+      DB_URL: mysql
+      ADMIN_URL: admin-service
+      REGISTRY_URL: registry-service
     depends_on:
       - mysql
 volumes:
