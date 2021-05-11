@@ -23,7 +23,7 @@ import java.util.TreeSet;
 public class SwaggerConfig {
     public static final Contact DEFAULT_CONTACT = new Contact("Michel Olvera", "https://github.com/michelolvera", "michel.olvera.p@outlook.com");
 
-    public static final ApiInfo DEFAULT_API_INFO = new ApiInfo("Account-Service", "Microservicio para la gestión de acciones de una cuenta", "1.0", "Copyright", DEFAULT_CONTACT, "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0", new ArrayList<>());
+    public static final ApiInfo DEFAULT_API_INFO = new ApiInfo("Movement-Service", "Microservicio para la gestión de acciones de una cuenta", "1.0", "Copyright", DEFAULT_CONTACT, "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0", new ArrayList<>());
 
     /**
      * Método que genera el Docket con el que Swagger trabajara
