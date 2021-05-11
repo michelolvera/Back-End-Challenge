@@ -1,7 +1,7 @@
 # Back-End-Challenge
 ---
 
-## Descripcion
+## Descripción
 
 Proyecto solicitado por [GBM](https://gbm.com/) como reto para demostrar habilidades de programación.
 

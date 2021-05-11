@@ -1,4 +1,4 @@
-FROM amazoncorretto:11
+FROM maven:3-amazoncorretto-11
 
 MAINTAINER Michel Olvera <michel.olvera.p@outlook.com>
 
@@ -6,7 +6,7 @@ COPY ./ /to_build/
 
 WORKDIR /to_build/
 
-RUN ./mvnw clean compile package -DskipTests
+RUN mvn clean compile package -DskipTests
 
 RUN cp ./target/movement-service-0.0.1-SNAPSHOT.jar /movement-service-0.0.1-SNAPSHOT.jar
 
