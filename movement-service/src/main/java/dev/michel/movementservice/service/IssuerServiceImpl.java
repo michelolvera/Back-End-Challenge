@@ -7,6 +7,7 @@ import dev.michel.movementservice.repository.IssuerRegistryRepository;
 import dev.michel.movementservice.repository.IssuerRepository;
 import dev.michel.movementservice.util.ApiUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Minutes;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import java.util.List;
 /**
  * Implementación del servicio que permite la administración de acciones
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class IssuerServiceImpl implements IssuerService {
@@ -36,18 +38,24 @@ public class IssuerServiceImpl implements IssuerService {
      * @return Lista de acciones de un usuario
      */
     @Override
-    public List<IssuerResponse> createIssuer(IssuerRequest issuerRequest) throws ResponseStatusException{
-        if (isClosedMarket(issuerRequest.getTimestamp()))
+    public List<IssuerResponse> createIssuer(IssuerRequest issuerRequest){
+        if (isClosedMarket(issuerRequest.getTimestamp())){
+            log.warn("No se pueden realizar operaciones fuera del horario establecido");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closed Market");
+        }
         IssuerRegistry lastSameOperation = issuerRegistryRepository.findByAccountIdAndIssuerNameAndTotalSharesAndSharePriceAndOperation(issuerRequest.getAccountId(), issuerRequest.getIssuerName(), issuerRequest.getTotal_shares(), issuerRequest.getShare_price(), issuerRequest.getOperation());
-        if (lastSameOperation != null && Minutes.minutesBetween(new DateTime(lastSameOperation.getOperationMoment()), new DateTime(apiUtils.timestampToCalendar(issuerRequest.getTimestamp()))).isLessThan(Minutes.minutes(5)))
+        if (lastSameOperation != null && Minutes.minutesBetween(new DateTime(lastSameOperation.getOperationMoment()), new DateTime(apiUtils.timestampToCalendar(issuerRequest.getTimestamp()))).isLessThan(Minutes.minutes(5))){
+            log.error("La operación se considera duplicada ya que la marca de tiempo no tiene 5 minutos de diferencia respecto a otra operación con los mismos datos.");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Operation");
+        }
         issuerRequest.setOperation(issuerRequest.getOperation().toUpperCase());
         issuerRequest.setIssuerName(issuerRequest.getIssuerName().toUpperCase());
         IssuerRequest currentIssuer = issuerRepository.findByAccountIdAndIssuerName(issuerRequest.getAccountId(), issuerRequest.getIssuerName());
         if (currentIssuer == null) {
-            if (issuerRequest.getOperation().equalsIgnoreCase("SELL"))
+            if (issuerRequest.getOperation().equalsIgnoreCase("SELL")){
+                log.error("No se tienen suficientes acciones para realizar esta operación.");
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You don't have enough shares");
+            }
             issuerRequest.setCreateAt(new Date());
             issuerRepository.save(issuerRequest);
         } else {
@@ -60,8 +68,10 @@ public class IssuerServiceImpl implements IssuerService {
                     issuerRepository.save(currentIssuer);
                     break;
                 case "SELL":
-                    if (currentIssuer.getTotal_shares() < issuerRequest.getTotal_shares())
+                    if (currentIssuer.getTotal_shares() < issuerRequest.getTotal_shares()){
+                        log.error("No se tienen suficientes acciones para realizar esta operación.");
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You don't have enough shares");
+                    }
                     if (currentIssuer.getTotal_shares() - issuerRequest.getTotal_shares() == 0)
                         issuerRepository.delete(currentIssuer);
                     else {
@@ -72,6 +82,7 @@ public class IssuerServiceImpl implements IssuerService {
             }
         }
         issuerRegistryRepository.save(apiUtils.issuerRequestToIssuerRegistryMapper(issuerRequest));
+        log.info("La transacción se realizó de manera correcta");
         return getAllIssuersByAccountId(issuerRequest.getAccountId());
     }
 
