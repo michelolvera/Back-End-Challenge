@@ -1,21 +1,23 @@
 server:
   port: 0 # El puerto 0 indica un puerto aleatorio
+  error:
+    include-message: always
 
 spring:
   application:
     name: movement-service # Nombre de la aplicación
   datasource:
-    url: jdbc:mysql://localhost:3306/backend # URL de la base de datos a la que se conectara
+    url: jdbc:mysql://mysql:3306/${DB} # URL de la base de datos a la que se conectara
     driverClassName: com.mysql.cj.jdbc.Driver # Driver utilizado para el manejo de la base de datos
-    username: root # Nombre de usuario de la base de datos
-    password: # Contraseña de la base de datos
+    username: ${DB_USER} # Nombre de usuario de la base de datos
+    password: ${DB_PASS} # Contraseña de la base de datos
   jpa:
     hibernate:
       ddl-auto: update # Indica que se debe actualizar el esquema de la base de datos al inicializar la aplicación
   boot:
     admin:
       client:
-        url: http://localhost:8086 # URL del servidor Spring Boot Admin
+        url: http://admin-service:8086 # URL del servidor Spring Boot Admin
 
 logging:
   pattern:
@@ -24,7 +26,7 @@ logging:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8099/eureka/ # URL del servidor Eureka
+      defaultZone: http://registry-service:8099/eureka/ # URL del servidor Eureka
 
 feign:
   circuitbreaker:

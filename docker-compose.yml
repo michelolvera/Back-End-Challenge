@@ -1,0 +1,54 @@
+version: '3.1'
+services:
+  mysql:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: r00t!
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - 'mysql_data:/var/lib/mysql'
+  registry-service:
+    build:
+      context: ./registry-service
+    restart: always
+    ports:
+      - 8099:8099
+  gateway-service:
+    build:
+      context: ./gateway-service
+    restart: always
+    ports:
+      - 8080:8080
+  admin-service:
+    build: 
+      context: ./admin-service
+    restart: always
+    ports:
+      - 8086:8086
+  account-service:
+    build:
+      context: ./account-service
+    restart: always
+    environment:
+      DB: database
+      DB_USER: user
+      DB_PASS: password
+    depends_on:
+      - mysql
+  movement-service:
+    build: 
+      context: ./movement-service
+    restart: always
+    environment:  
+      DB: database
+      DB_USER: user
+      DB_PASS: password
+    depends_on:
+      - mysql
+volumes:
+  mysql_data:
+    driver: local

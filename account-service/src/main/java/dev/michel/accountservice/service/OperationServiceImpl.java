@@ -122,6 +122,7 @@ public class OperationServiceImpl implements OperationService {
      */
     private boolean isClosedMarket(Long timeStamp) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT-5"));
         calendar.setTime(new Date(timeStamp * 1000));
         int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
         return hourOfDay < 6 || hourOfDay >= 15;

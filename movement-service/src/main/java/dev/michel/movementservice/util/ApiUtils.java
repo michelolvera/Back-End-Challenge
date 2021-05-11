@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Clase que almacena métodos útiles para el funcionamiento de la API
@@ -28,6 +29,7 @@ public class ApiUtils {
 
     public Calendar timestampToCalendar(Long timeStamp) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT-5"));
         calendar.setTime(new Date(timeStamp * 1000));
         return calendar;
     }
