@@ -36,37 +36,52 @@ public class OperationServiceImpl implements OperationService {
     public ResponseEntity<OperationResponse> createOperation(Long id, IssuerRequest issuerRequest) {
         Account currentAccount = accountService.getAccount(id);
         if (currentAccount == null) {
+            log.error("No se puede crear el movimiento ya que no existe la cuenta");
             return ResponseEntity.badRequest().body(operationResponseErrorBuilder(null, "INEXISTENT_ACCOUNT"));
         }
-        if (isClosedMarket(issuerRequest.getTimestamp()))
+        if (isClosedMarket(issuerRequest.getTimestamp())){
+            log.warn("No se pueden realizar operaciones fuera del horario establecido");
             return ResponseEntity.badRequest().body(operationResponseErrorBuilder(currentAccount, "CLOSED_MARKET"));
+        }
         Double operationValue = issuerRequest.getShare_price() * issuerRequest.getTotal_shares();
         switch (issuerRequest.getOperation().toUpperCase()) {
             case "BUY":
-                if (currentAccount.getCash() < operationValue)
+                if (currentAccount.getCash() < operationValue){
+                    log.error("No se tiene suficiente crédito para realizar esta operación.");
                     return ResponseEntity.badRequest().body(operationResponseErrorBuilder(currentAccount, "NOT_ENOUGH_CASH"));
+                }
                 operationValue = -operationValue;
                 break;
             case "SELL":
-                if (currentAccount.getIssuers().stream().noneMatch(currentIssuer -> currentIssuer.getIssuer_name().equalsIgnoreCase(issuerRequest.getIssuer_name()) && currentIssuer.getTotal_shares() >= issuerRequest.getTotal_shares()))
+                if (currentAccount.getIssuers().stream().noneMatch(currentIssuer -> currentIssuer.getIssuer_name().equalsIgnoreCase(issuerRequest.getIssuer_name()) && currentIssuer.getTotal_shares() >= issuerRequest.getTotal_shares())){
+                    log.error("No se tienen suficientes acciones para realizar esta operación.");
                     return ResponseEntity.badRequest().body(operationResponseErrorBuilder(currentAccount, "NOT_ENOUGH_SHARES"));
+                }
                 break;
         }
         Account updatedAccount = updateAccountCash(currentAccount, operationValue);
         if (updatedAccount == null) {
+            log.error("No se pudo reducir el saldo de la cuenta, se cancela la operación.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(operationResponseErrorBuilder(currentAccount, "ERROR_GENERATING_TRANSACTION"));
         }
+        log.info("Se crea la operación en el servicio de movimientos");
         ResponseEntity<List<IssuerResponse>> currentIssuersResponseEntity = movementClient.createMovement(id, issuerRequest);
         if (currentIssuersResponseEntity.getStatusCode() != HttpStatus.CREATED) {
+            log.warn("No se ha podido realizar la operación en el servicio de movimientos: {}", currentIssuersResponseEntity);
+            log.info("Retornando el saldo de la cuenta por un valor de: {}", operationValue);
             updatedAccount = updateAccountCash(currentAccount, -operationValue);
-            if (updatedAccount == null)
+            if (updatedAccount == null){
+                log.error("No se pudo retornar el saldo de la cuenta");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(operationResponseErrorBuilder(currentAccount, "ERROR_UNDOING_TRANSACTION"));
+            }
+            log.info("Se retorna error, ¿han pasado ya 5 minutos desde que se hizo una operación con los mismos datos?");
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(OperationResponse.builder()
                     .business_errors(Arrays.asList("ERROR_GENERATING_TRANSACTION", "HAS_IT_BEEN_5_MINUTES_SINCE_LAST_TRANSACTION?"))
                     .current_balance(getCurrentBalance(currentAccount))
                     .build());
         }
         updatedAccount.setIssuers(currentIssuersResponseEntity.getBody());
+        log.info("La transacción se realizó de manera correcta");
         return ResponseEntity.ok(OperationResponse.builder()
                 .business_errors(new ArrayList<>())
                 .current_balance(getCurrentBalance(updatedAccount))

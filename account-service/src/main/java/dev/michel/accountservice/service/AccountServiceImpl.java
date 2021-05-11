@@ -4,15 +4,18 @@ import dev.michel.accountservice.client.MovementClientCircuitBreaker;
 import dev.michel.accountservice.entity.Account;
 import dev.michel.accountservice.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Implementación del servicio que permite realizar CRUD de cuentas
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
@@ -30,8 +33,10 @@ public class AccountServiceImpl implements AccountService {
     public Account getAccount(Long id) {
         Account account = accountRepository.findById(id).orElse(null);
         if (account != null){
-            if (account.getStatus().equalsIgnoreCase("DELETED"))
+            if (account.getStatus().equalsIgnoreCase("DELETED")){
+                log.warn("La cuenta buscada se elimino: {}", account);
                 return null;
+            }
             account.setIssuers(movementClient.getAllIssuersByAccountId(id).getBody());
         }
         return account;
@@ -48,7 +53,7 @@ public class AccountServiceImpl implements AccountService {
         account.setStatus("CREATED");
         account.setCreateAt(new Date());
         Account accountDB = accountRepository.save(account);
-        accountDB.setIssuers(movementClient.movementsFallback(account.getId(), null).getBody());
+        accountDB.setIssuers(new ArrayList<>());
         return accountDB;
     }
 
@@ -81,8 +86,10 @@ public class AccountServiceImpl implements AccountService {
         if (accountDB == null) {
             return null;
         }
-        if (accountDB.getCash() > 0 || !accountDB.getIssuers().isEmpty())
+        if (accountDB.getCash() > 0 || !accountDB.getIssuers().isEmpty()){
+            log.warn("Se intenta eliminar una cuenta que aún tiene crédito o acciones.");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot delete an account with cash or shares");
+        }
         accountDB.setStatus("DELETED");
         return accountRepository.save(accountDB);
     }
