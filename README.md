@@ -29,7 +29,7 @@ Todos estos servicios trabajan en conjunto para proporcionar una API con caracte
 
 Los servicios **account-service** y **movement-service** no se ejecutan en un puerto fijo, pudiendo tener mas de una instancia ejecutando al mismo tiempo y permitiendo buen rendimiento en altas demandas.
 
-Estos servicios capaces de comunicarse mediante un balanceador de carga del lado de cliente llamado **Spring Cloud Feign**, además de esto, las conexiones están protegidas con **resilience4j-circuitbreaker**, esto permite que, aunque se tengan errores en la petición a un servicio, se pueda seguir atendiendo al consumidor con una respuesta parcial.
+Estos servicios capaces de comunicarse mediante un balanceador de carga del lado de cliente llamado **Spring Cloud Feign**, además de esto, las conexiones están protegidas con **resilience4j-circuitbreaker**, esto permite que, aunque se tengan errores en la petición a un servicio, se pueda seguir atendiendo al consumidor con una respuesta parcial, por si no fuera poco, gracias a Spring Cloud Sleuth, tenemos registros con un id único por petición en cada servicio.
 
 Estos servicios cuentan también con **Swagger-UI** para fácil manejo de documentación y creación de clientes automática.
 
